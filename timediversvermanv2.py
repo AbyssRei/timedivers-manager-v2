@@ -112,8 +112,12 @@ def get_active_folder(game_info):
 def get_steam_folder(game_info):
     return os.path.join(get_common(game_info), game_info["installdir"] + "_steam")
 
+def _sanitize_date(date):
+    return date.replace(" ", "_").replace(":", "-")
+
 def format_version_folder(game_info, date, branch="None"):
-    suffix = f"_v{date}" if branch == "None" else f"_v{date}_{branch}"
+    safe = _sanitize_date(date)
+    suffix = f"_v{safe}" if branch == "None" else f"_v{safe}_{branch}"
     return os.path.join(get_common(game_info), game_info["installdir"] + suffix)
 
 def get_content_folder(game_info):
@@ -357,7 +361,8 @@ class SteamConsoleWindow(tk.Toplevel):
                             progress_state["done"] += 1
                 self.after(0, self._import_done)
             except Exception as e:
-                self.after(0, lambda: self._import_error(str(e)))
+                err = str(e)
+                self.after(0, lambda: self._import_error(err))
 
         threading.Thread(target=do_import, daemon=True).start()
 
